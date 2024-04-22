@@ -1,6 +1,6 @@
 class SortingAlgorithm {
 	constructor(array) {
-		if (!this.#isAnArray(array)) throw new Error('Please provide a valid array.');
+		if (!Array.isArray(array)) throw new Error('Please provide a valid array.');
 		this.array = array;
 	}
 
@@ -8,41 +8,64 @@ class SortingAlgorithm {
 		[this.array[index1], this.array[index2]] = [this.array[index2], this.array[index1]];
 	}
 
-	#isAnArray(data) {
-		return Array.isArray(data);
+	bubbleSort() {
+		const { array } = this;
+		const len = array.length;
+
+		for (let i = 0; i < len; i++) {
+			let swapped = false;
+
+			for (let j = 0; j < len - 1 - i; j++) {
+				if (array[j] > array[j + 1]) {
+					this.#swapElement(j, j + 1);
+					swapped = true;
+				}
+			}
+
+			if (!swapped) break;
+		}
+
+		return array;
 	}
 
 	selectionSort() {
-		for (let i = 0; i < this.array.length; i++) {
+		const { array } = this;
+		const len = array.length;
+
+		for (let i = 0; i < len - 1; i++) {
 			let minIndex = i;
-			for (let j = i + 1; j < this.array.length; j++) {
-				if (this.array[j] < this.array[minIndex]) {
+
+			for (let j = i + 1; j < len; j++) {
+				if (array[j] < array[minIndex]) {
 					minIndex = j;
 				}
 			}
-			this.#swapElement(minIndex, i);
-		}
-		return this.array;
-	}
 
-	bubbleSort() {
-		for (let i = 0; i < this.array.length; i++) {
-			for (let j = i + 1; j < this.array.length; j++) {
-				if (this.array[i] > this.array[j]) {
-					this.#swapElement(i, j);
-				}
+			if (minIndex !== i) {
+				this.#swapElement(minIndex, i);
 			}
 		}
-		return this.array;
+
+		return array;
 	}
 
 	insertionSort() {
-		for (let i = 1; i < this.array.length; i++) {
-			for (let j = i - 1; j >= 0 && this.array[j + 1] < this.array[j]; j--) {
-				this.#swapElement(j, j + 1);
+		const { array } = this;
+		const len = array.length;
+
+		for (let i = 1; i < len; i++) {
+			let currentValue = array[i];
+			let j = i - 1;
+
+			while (j >= 0 && array[j] > currentValue) {
+				array[j + 1] = array[j];
+				j--;
 			}
+
+			array[j + 1] = currentValue;
 		}
-		return this.array;
+
+		return array;
 	}
 
 	_quickSort(data) {
@@ -64,12 +87,12 @@ class SortingAlgorithm {
 	}
 
 	quickSort() {
-		return this._quickSort(this.array);
+		return this._quickSort([...this.array]);
 	}
+
 	#merge(leftArray, rightArray) {
-		let resultArray = [];
-		let leftIndex = 0;
-		let rightIndex = 0;
+		let [leftIndex, rightIndex, resultArray] = [0, 0, []];
+
 		while (leftIndex < leftArray.length && rightIndex < rightArray.length) {
 			if (leftArray[leftIndex] < rightArray[rightIndex]) {
 				resultArray.push(leftArray[leftIndex]);
@@ -79,15 +102,24 @@ class SortingAlgorithm {
 				rightIndex++;
 			}
 		}
-		return resultArray.concat(leftArray.slice(leftIndex)).concat(rightArray.slice(rightIndex));
-	}
-	mergeSort() {
-		if (this.array.length === 1) return array;
 
-		const middle = Math.floor(this.array.length / 2);
-		const leftArray = this.array.slice(0, middle);
-		const rightArray = this.array.slice(middle);
-		return this.#merge(leftArray, rightArray);
+		return resultArray.concat(leftArray.slice(leftIndex), rightArray.slice(rightIndex));
+	}
+
+	mergeSort() {
+		const { array } = this;
+		const len = array.length;
+
+		if (len <= 1) return array;
+
+		const middle = Math.floor(len / 2);
+		const leftArray = array.slice(0, middle);
+		const rightArray = array.slice(middle);
+
+		return this.#merge(
+			new SortingAlgorithm(leftArray).mergeSort(),
+			new SortingAlgorithm(rightArray).mergeSort()
+		);
 	}
 }
 
